@@ -67,11 +67,8 @@ void LoadSwiftlyS2()
 
     std::string path = parser.get("sw_path", defaultPath);
     std::string computedPath = (std::string(Plat_GetGameDirectory()) + "/csgo/" + path + WIN_LIN("/bin/win64/swiftlys2.dll", "/bin/linuxsteamrt64/swiftlys2.so"));
-    Msg(computedPath.c_str());
-    Msg("\n");
 
     libPtr = load_library(computedPath.c_str());
-    Msg(str_format("%p\n", libPtr));
     void *startCorePtr = get_export(libPtr, "StartCore");
     if (!startCorePtr)
     {

@@ -19,13 +19,18 @@
 #include "shared.h"
 #include "dynlib.h"
 #include "hooks.h"
+#include "tier0/platform.h"
+#include "tier0/conmsg.h"
 
 #include <string>
 #include <safetyhook/safetyhook.hpp>
+#include <s2binlib/s2binlib.h>
 
 typedef void *(*CreateInterfaceFn)(const char *name, int *retcode);
 
 CreateInterfaceFn g_pCreateIFaceServer = nullptr;
+
+bool s2bin_init = false;
 
 SW_API void *CreateInterface(const char *name, int *retcode)
 {
@@ -34,13 +39,34 @@ SW_API void *CreateInterface(const char *name, int *retcode)
         g_pCreateIFaceServer = (CreateInterfaceFn)get_export(load_library(WIN_LIN("../../csgo/bin/win64/server.dll", "../../csgo/bin/linuxsteamrt64/libserver.so")), "CreateInterface");
     }
 
-    if (std::string(name).find("Source2Server") != std::string::npos)
+    if (!s2bin_init)
+    {
+        s2binlib_initialize(Plat_GetGameDirectory(), "csgo");
+        s2bin_init = true;
+    }
+
+    if (std::string(name).find("Source2ServerConfig") != std::string::npos)
     {
         auto ret = g_pCreateIFaceServer(name, retcode);
 
-        if ((bool)g_Source2Server_Init_Hook == false)
+        if ((bool)g_Source2ServerConfig_Connect_Hook == false)
         {
-            g_Source2Server_Init_Hook = safetyhook::create_inline(((void ***)ret)[0][3], (void *)Source2Server_Init);
+            g_Source2ServerConfig_Connect_Hook = safetyhook::create_inline(((void ***)ret)[0][0], (void *)Source2ServerConfig_Connect);
+        }
+
+        if (retcode)
+            *retcode = 0;
+
+        return ret;
+    }
+    else if (std::string(name).find("Source2Server") != std::string::npos)
+    {
+        auto ret = g_pCreateIFaceServer(name, retcode);
+
+        s2binlib_set_module_base_from_pointer("server", ret);
+
+        if ((bool)g_Source2Server_Shutdown_Hook == false)
+        {
             g_Source2Server_Shutdown_Hook = safetyhook::create_inline(((void ***)ret)[0][5], (void *)Source2Server_Shutdown);
         }
 

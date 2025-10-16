@@ -17,6 +17,19 @@ target("server")
     set_optimize("fastest")
     set_symbols("debug")
     set_strip("none")
+    set_runtimes("MT")
+
+    if is_plat("windows") then
+        add_links({
+            "vendor/s2binlib/s2binlib.lib",
+            "ntdll",
+            "kernel32",
+        })
+    else
+        add_links({
+            "vendor/s2binlib/libs2binlib.a"
+        })
+    end
 
     after_build(function(target)
         function GetDistDirName()

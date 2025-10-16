@@ -21,10 +21,12 @@
 
 #include <safetyhook/safetyhook.hpp>
 
-void *Source2Server_Init(void *pThis, const char *pInterfaceName);
 void Source2Server_Shutdown(void *pThis);
+bool Source2_Initialize(void *pThis);
+bool Source2ServerConfig_Connect(void *pThis, void *factory);
 
-extern safetyhook::InlineHook g_Source2Server_Init_Hook;
 extern safetyhook::InlineHook g_Source2Server_Shutdown_Hook;
+extern safetyhook::InlineHook g_Source2_Initialize_Hook;
+extern safetyhook::InlineHook g_Source2ServerConfig_Connect_Hook;
 
 #endif
