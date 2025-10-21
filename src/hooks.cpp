@@ -20,6 +20,7 @@
 
 #include "dynlib.h"
 #include <s2binlib/s2binlib.h>
+#include "tier0/platform.h"
 
 safetyhook::InlineHook g_Source2_Initialize_Hook;
 safetyhook::InlineHook g_Source2Server_Shutdown_Hook;
@@ -47,8 +48,6 @@ bool Source2_Initialize(void *pThis)
 bool Source2ServerConfig_Connect(void *pThis, void *factory)
 {
     bool ret = g_Source2ServerConfig_Connect_Hook.call<bool>(pThis, factory);
-
-    s2binlib_set_module_base_from_pointer("engine2", load_library(WIN_LIN("engine2.dll", "libengine2.so")));
 
     if ((bool)g_Source2_Initialize_Hook == false)
     {

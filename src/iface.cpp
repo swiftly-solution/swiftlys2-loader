@@ -36,7 +36,8 @@ SW_API void *CreateInterface(const char *name, int *retcode)
 {
     if (!g_pCreateIFaceServer)
     {
-        g_pCreateIFaceServer = (CreateInterfaceFn)get_export(load_library(WIN_LIN("../../csgo/bin/win64/server.dll", "../../csgo/bin/linuxsteamrt64/libserver.so")), "CreateInterface");
+        std::string computedPath = std::string(Plat_GetGameDirectory()) + "/csgo/bin/" + WIN_LIN("win64/server.dll", "linuxsteamrt64/libserver.so");
+        g_pCreateIFaceServer = (CreateInterfaceFn)get_export(load_library(computedPath.c_str()), "CreateInterface");
     }
 
     if (!s2bin_init)
@@ -62,8 +63,6 @@ SW_API void *CreateInterface(const char *name, int *retcode)
     else if (std::string(name).find("Source2Server") != std::string::npos)
     {
         auto ret = g_pCreateIFaceServer(name, retcode);
-
-        s2binlib_set_module_base_from_pointer("server", ret);
 
         if ((bool)g_Source2Server_Shutdown_Hook == false)
         {
