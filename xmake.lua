@@ -31,6 +31,10 @@ target("server")
         })
     end
 
+    if is_plat("linux") then
+        add_shflags("-Wl,--exclude-libs,ALL")
+    end
+
     after_build(function(target)
         function GetDistDirName()
             if is_plat("windows") then
