@@ -55,9 +55,10 @@ bool Source2ServerConfig_Connect(void *pThis, void *factory)
         s2binlib_pattern_scan(
             "engine2",
             WIN_LIN(
-                "40 55 53 56 57 41 54 41 56 41 57 48 8D AC 24 50 FF FF FF",
+                "40 55 53 56 57 41 54 41 55 41 56 41 57 48 8D AC 24 ? ? ? ? 48 81 EC ? ? ? ? 4C 8B E1",
                 "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 81 EC ? ? ? ? 48 89 BD ? ? ? ? 48 8B 3D ? ? ? ? 48 85 FF"),
             &s2init_func);
+
         g_Source2_Initialize_Hook = safetyhook::create_inline(s2init_func, (void *)Source2_Initialize);
     }
 
