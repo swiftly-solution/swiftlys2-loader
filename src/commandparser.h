@@ -45,7 +45,7 @@ public:
         {
             if (tokens[j][0] == '-')
             {
-                std::string key = tokens[j];
+                std::string key = tokens[j].substr(1);
                 std::string value = "true";
 
                 if (j + 1 < tokens.size() && tokens[j + 1][0] != '-')
