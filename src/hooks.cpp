@@ -51,6 +51,8 @@ bool Source2ServerConfig_Connect(void *pThis, void *factory)
 
     if ((bool)g_Source2_Initialize_Hook == false)
     {
+        // For both Windows and Linux, it can be the function before Engine_Start_Looping from Source2Main
+        // The function also contains "Engine loading startup asset: '%s'\n"
         void *s2init_func = nullptr;
         s2binlib_pattern_scan(
             "engine2",
