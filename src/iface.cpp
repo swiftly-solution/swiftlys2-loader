@@ -43,6 +43,7 @@ SW_API void *CreateInterface(const char *name, int *retcode)
     if (!s2bin_init)
     {
         s2binlib_initialize(Plat_GetGameDirectory(), "csgo");
+        s2binlib_dump_xrefs("engine2");
         s2bin_init = true;
     }
 

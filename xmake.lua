@@ -24,6 +24,7 @@ target("server")
             "vendor/s2binlib/s2binlib.lib",
             "ntdll",
             "kernel32",
+            "psapi",
         })
     else
         add_links({
