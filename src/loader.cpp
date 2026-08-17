@@ -1,6 +1,6 @@
 /************************************************************************************************
  *  SwiftlyS2 is a scripting framework for Source2-based games.
- *  Copyright (C) 2025 Swiftly Solution SRL via Sava Andrei-Sebastian and it's contributors
+ *  Copyright (C) 2025-2026 Swiftly Solution SRL via Sava Andrei-Sebastian and it's contributors
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,43 +17,13 @@
  ************************************************************************************************/
 
 #include "dynlib.h"
+#include "hooks.h"
 #include "tier0/conmsg.h"
 #include "tier0/platform.h"
 #include <tier0/commandline.h>
 #include "commandparser.h"
 
 #include <stdlib.h>
-#include <stdarg.h>
-#include <stdio.h>
-
-char *str_format(const char *fmt, ...)
-{
-    va_list args;
-    va_start(args, fmt);
-
-    va_list args_copy;
-    va_copy(args_copy, args);
-    int len = vsnprintf(NULL, 0, fmt, args_copy);
-    va_end(args_copy);
-
-    if (len < 0)
-    {
-        va_end(args);
-        return NULL;
-    }
-
-    char *buf = (char *)malloc(len + 1);
-    if (!buf)
-    {
-        va_end(args);
-        return NULL;
-    }
-
-    vsnprintf(buf, len + 1, fmt, args);
-    va_end(args);
-
-    return buf;
-}
 
 void *libPtr = nullptr;
 
@@ -76,7 +46,7 @@ void LoadSwiftlyS2()
         return;
     }
 
-    reinterpret_cast<bool (*)()>(startCorePtr)();
+    reinterpret_cast<bool (*)(void *, void *)>(startCorePtr)((void *)g_pCreateIFaceServer, (void *)g_pCreateIFaceEngine);
 }
 
 void UnloadSwiftlyS2()

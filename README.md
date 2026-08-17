@@ -18,6 +18,7 @@ xmake
 ```
 
 The compiled plugin will be built to `build/package/addons/swiftlys2/bin/` with platform-specific subdirectories:
+
 - Windows: `win64/server.dll`
 - Linux: `linuxsteamrt64/libserver.so`
 
@@ -36,6 +37,7 @@ The loader supports the following command-line parameter:
 - `sw_path`: Custom path to SwiftlyS2 installation (default: `addons/swiftlys2`)
 
 Example:
+
 ```bash
 -sw_path "custom/path/to/swiftlys2"
 ```
@@ -50,7 +52,7 @@ Example:
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-Copyright (C) 2025 Swiftly Solution SRL via Sava Andrei-Sebastian and its contributors.
+Copyright (C) 2025-2026 Swiftly Solution SRL via Sava Andrei-Sebastian and its contributors.
 
 See the [GNU General Public License](https://www.gnu.org/licenses/) for more details.
 

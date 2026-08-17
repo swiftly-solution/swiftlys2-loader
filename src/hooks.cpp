@@ -1,6 +1,6 @@
 /************************************************************************************************
  *  SwiftlyS2 is a scripting framework for Source2-based games.
- *  Copyright (C) 2025 Swiftly Solution SRL via Sava Andrei-Sebastian and it's contributors
+ *  Copyright (C) 2025-2026 Swiftly Solution SRL via Sava Andrei-Sebastian and it's contributors
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,6 +26,8 @@ safetyhook::InlineHook g_Source2_Initialize_Hook;
 safetyhook::InlineHook g_Source2Server_Shutdown_Hook;
 safetyhook::InlineHook g_Source2ServerConfig_Connect_Hook;
 
+CreateInterfaceFn g_pCreateIFaceEngine;
+
 void LoadSwiftlyS2();
 void UnloadSwiftlyS2();
 
@@ -48,6 +50,7 @@ bool Source2_Initialize(void *pThis)
 bool Source2ServerConfig_Connect(void *pThis, void *factory)
 {
     bool ret = g_Source2ServerConfig_Connect_Hook.call<bool>(pThis, factory);
+    g_pCreateIFaceEngine = (CreateInterfaceFn)factory;
 
     if ((bool)g_Source2_Initialize_Hook == false)
     {
