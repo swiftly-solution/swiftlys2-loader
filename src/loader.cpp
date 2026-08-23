@@ -28,10 +28,11 @@
 void *libPtr = nullptr;
 extern std::string g_sSwiftlyS2Path;
 extern S2BinLib004 *g_pS2BinLib;
+extern std::string g_sGame;
 
 void LoadSwiftlyS2()
 {
-    std::string computedPath = (std::string(Plat_GetGameDirectory()) + "/csgo/" + g_sSwiftlyS2Path + "/bin/" + WIN_LIN("win64/swiftlys2.dll", "linuxsteamrt64/swiftlys2.so"));
+    std::string computedPath = (std::string(Plat_GetGameDirectory()) + "/" + g_sGame + "/" + g_sSwiftlyS2Path + "/bin/" + WIN_LIN("win64/swiftlys2.dll", "linuxsteamrt64/swiftlys2.so"));
 
     libPtr = load_library(computedPath.c_str());
     void *startCorePtr = get_export(libPtr, "StartCore");

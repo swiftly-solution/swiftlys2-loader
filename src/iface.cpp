@@ -33,12 +33,16 @@ S2BinLib004 *g_pS2BinLib = nullptr;
 
 bool s2bin_init = false;
 std::string g_sSwiftlyS2Path = "";
+std::string g_sGame = "";
+
+std::string GetGameFolder();
 
 SW_API void *CreateInterface(const char *name, int *retcode)
 {
+    g_sGame = GetGameFolder();
     if (!g_pCreateIFaceServer)
     {
-        std::string computedPath = std::string(Plat_GetGameDirectory()) + "/csgo/bin/" + WIN_LIN("win64/server.dll", "linuxsteamrt64/libserver.so");
+        std::string computedPath = std::string(Plat_GetGameDirectory()) + "/" + g_sGame + "/bin/" + WIN_LIN("win64/server.dll", "linuxsteamrt64/libserver.so");
         g_pCreateIFaceServer = (CreateInterfaceFn)get_export(load_library(computedPath.c_str()), "CreateInterface");
     }
 
@@ -51,9 +55,9 @@ SW_API void *CreateInterface(const char *name, int *retcode)
         parser.parse(cmdLine);
         g_sSwiftlyS2Path = parser.get("sw_path", defaultPath);
 
-        std::string s2binlibPath = std::string(Plat_GetGameDirectory()) + "/csgo/" + g_sSwiftlyS2Path + "/bin/" + WIN_LIN("win64/s2binlib.dll", "linuxsteamrt64/s2binlib.so");
+        std::string s2binlibPath = std::string(Plat_GetGameDirectory()) + "/" + g_sGame + "/" + g_sSwiftlyS2Path + "/bin/" + WIN_LIN("win64/s2binlib.dll", "linuxsteamrt64/s2binlib.so");
         g_pS2BinLib = reinterpret_cast<S2CreateInterfaceFn>(get_export(load_library(s2binlibPath.c_str()), "S2BinLib_CreateInterface"))(S2BINLIB_INTERFACE_NAME);
-        g_pS2BinLib->Initialize(Plat_GetGameDirectory(), "csgo");
+        g_pS2BinLib->Initialize(Plat_GetGameDirectory(), g_sGame.c_str());
         g_pS2BinLib->DumpXrefs("engine2");
         s2bin_init = true;
     }
