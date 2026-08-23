@@ -60,7 +60,7 @@ std::string GetGameFolder()
     {
         if (currentPath.filename() == "addons")
         {
-            return currentPath.parent_path().filename();
+            return currentPath.parent_path().filename().string();
         }
         currentPath = currentPath.parent_path();
     }
