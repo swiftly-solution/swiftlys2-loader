@@ -42,7 +42,7 @@ void LoadSwiftlyS2()
         return;
     }
 
-    reinterpret_cast<bool (*)(void *, void *, void *)>(startCorePtr)((void *)g_pCreateIFaceServer, (void *)g_pCreateIFaceEngine, (void *)g_pS2BinLib);
+    reinterpret_cast<bool (*)(void *, void *, void *, const char *)>(startCorePtr)((void *)g_pCreateIFaceServer, (void *)g_pCreateIFaceEngine, (void *)g_pS2BinLib, g_sGame.c_str());
 }
 
 void UnloadSwiftlyS2()
