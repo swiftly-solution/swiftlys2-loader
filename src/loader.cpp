@@ -20,23 +20,18 @@
 #include "hooks.h"
 #include "tier0/conmsg.h"
 #include "tier0/platform.h"
-#include <tier0/commandline.h>
-#include "commandparser.h"
+#include <s2binlib/s2binlib.h>
 
 #include <stdlib.h>
+#include <string>
 
 void *libPtr = nullptr;
+extern std::string g_sSwiftlyS2Path;
+extern S2BinLib004 *g_pS2BinLib;
 
 void LoadSwiftlyS2()
 {
-    const char *defaultPath = WIN_LIN("addons\\swiftlys2", "addons/swiftlys2");
-    const char *cmdLine = CommandLine()->GetCmdLine();
-
-    CommandParser parser;
-    parser.parse(cmdLine);
-
-    std::string path = parser.get("sw_path", defaultPath);
-    std::string computedPath = (std::string(Plat_GetGameDirectory()) + "/csgo/" + path + WIN_LIN("/bin/win64/swiftlys2.dll", "/bin/linuxsteamrt64/swiftlys2.so"));
+    std::string computedPath = (std::string(Plat_GetGameDirectory()) + "/csgo/" + g_sSwiftlyS2Path + "/bin/" + WIN_LIN("win64/swiftlys2.dll", "linuxsteamrt64/swiftlys2.so"));
 
     libPtr = load_library(computedPath.c_str());
     void *startCorePtr = get_export(libPtr, "StartCore");
@@ -46,7 +41,7 @@ void LoadSwiftlyS2()
         return;
     }
 
-    reinterpret_cast<bool (*)(void *, void *)>(startCorePtr)((void *)g_pCreateIFaceServer, (void *)g_pCreateIFaceEngine);
+    reinterpret_cast<bool (*)(void *, void *, void *)>(startCorePtr)((void *)g_pCreateIFaceServer, (void *)g_pCreateIFaceEngine, (void *)g_pS2BinLib);
 }
 
 void UnloadSwiftlyS2()

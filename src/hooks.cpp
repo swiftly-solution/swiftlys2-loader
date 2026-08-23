@@ -26,6 +26,8 @@ safetyhook::InlineHook g_Source2_Initialize_Hook;
 safetyhook::InlineHook g_Source2Server_Shutdown_Hook;
 safetyhook::InlineHook g_Source2ServerConfig_Connect_Hook;
 
+extern S2BinLib004 *g_pS2BinLib;
+
 CreateInterfaceFn g_pCreateIFaceEngine;
 
 void LoadSwiftlyS2();
@@ -34,6 +36,7 @@ void UnloadSwiftlyS2();
 void Source2Server_Shutdown(void *pThis)
 {
     UnloadSwiftlyS2();
+    g_pS2BinLib->Destroy();
 
     g_Source2Server_Shutdown_Hook.call<void>(pThis);
 }
@@ -55,7 +58,7 @@ bool Source2ServerConfig_Connect(void *pThis, void *factory)
     if ((bool)g_Source2_Initialize_Hook == false)
     {
         void *s2init_func = nullptr;
-        s2binlib_find_func_with_string("engine2", "Engine loading startup asset: '%s'\n", &s2init_func);
+        g_pS2BinLib->FindFuncWithString("engine2", "Engine loading startup asset: '%s'\n", &s2init_func);
 
         g_Source2_Initialize_Hook = safetyhook::create_inline(s2init_func, (void *)Source2_Initialize);
     }

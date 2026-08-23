@@ -21,14 +21,18 @@
 #include "hooks.h"
 #include "tier0/platform.h"
 #include "tier0/conmsg.h"
+#include "tier0/commandline.h"
+#include "commandparser.h"
 
 #include <string>
 #include <safetyhook/safetyhook.hpp>
 #include <s2binlib/s2binlib.h>
 
 CreateInterfaceFn g_pCreateIFaceServer = nullptr;
+S2BinLib004 *g_pS2BinLib = nullptr;
 
 bool s2bin_init = false;
+std::string g_sSwiftlyS2Path = "";
 
 SW_API void *CreateInterface(const char *name, int *retcode)
 {
@@ -40,8 +44,17 @@ SW_API void *CreateInterface(const char *name, int *retcode)
 
     if (!s2bin_init)
     {
-        s2binlib_initialize(Plat_GetGameDirectory(), "csgo");
-        s2binlib_dump_xrefs("engine2");
+        const char *defaultPath = WIN_LIN("addons\\swiftlys2", "addons/swiftlys2");
+        const char *cmdLine = CommandLine()->GetCmdLine();
+
+        CommandParser parser;
+        parser.parse(cmdLine);
+        g_sSwiftlyS2Path = parser.get("sw_path", defaultPath);
+
+        std::string s2binlibPath = std::string(Plat_GetGameDirectory()) + "/csgo/" + g_sSwiftlyS2Path + "/bin/" + WIN_LIN("win64/s2binlib.dll", "linuxsteamrt64/s2binlib.so");
+        g_pS2BinLib = reinterpret_cast<S2CreateInterfaceFn>(get_export(load_library(s2binlibPath.c_str()), "S2BinLib_CreateInterface"))(S2BINLIB_INTERFACE_NAME);
+        g_pS2BinLib->Initialize(Plat_GetGameDirectory(), "csgo");
+        g_pS2BinLib->DumpXrefs("engine2");
         s2bin_init = true;
     }
 
