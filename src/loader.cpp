@@ -35,6 +35,14 @@ void LoadSwiftlyS2()
     std::string computedPath = (std::string(Plat_GetGameDirectory()) + "/" + g_sGame + "/" + g_sSwiftlyS2Path + "/bin/" + WIN_LIN("win64/swiftlys2.dll", "linuxsteamrt64/swiftlys2.so"));
 
     libPtr = load_library(computedPath.c_str());
+    if (!libPtr)
+    {
+        std::string libraryError = get_library_error();
+        std::string errorMessage = "SwiftlyS2: Failed to load SwiftlyS2: " + libraryError + "\n";
+        Msg(errorMessage.c_str());
+        return;
+    }
+
     void *startCorePtr = get_export(libPtr, "StartCore");
     if (!startCorePtr)
     {

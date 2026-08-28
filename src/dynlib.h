@@ -1,6 +1,8 @@
 #ifndef src_dynlib_h
 #define src_dynlib_h
 
+#include <string>
+
 #ifdef _WIN32
 #include <Windows.h>
 #include <direct.h>
@@ -19,6 +21,7 @@
 #endif
 
 void *load_library(const char *);
+std::string get_library_error();
 void *get_export(void *, const char *);
 void unload_library(void *lib);
 
