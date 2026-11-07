@@ -18,50 +18,57 @@
 
 #include "hooks.h"
 
-#include "dynlib.h"
-#include <s2binlib/s2binlib.h>
-#include "tier0/platform.h"
+#include <safetyhook/safetyhook.hpp>
 
-safetyhook::InlineHook g_Source2_Initialize_Hook;
-safetyhook::InlineHook g_Source2Server_Shutdown_Hook;
-safetyhook::InlineHook g_Source2ServerConfig_Connect_Hook;
+static safetyhook::InlineHook s_Source2_Initialize_Hook;
+static safetyhook::InlineHook s_Source2Server_Shutdown_Hook;
+static safetyhook::InlineHook s_Source2ServerConfig_Connect_Hook;
 
-extern S2BinLib004 *g_pS2BinLib;
+static void InstallOnce(safetyhook::InlineHook &hook, void *target, auto detour)
+{
+    if (!hook)
+        hook = safetyhook::create_inline(target, reinterpret_cast<void *>(detour));
+}
 
-CreateInterfaceFn g_pCreateIFaceEngine;
-
-void LoadSwiftlyS2();
-void UnloadSwiftlyS2();
-
-void Source2Server_Shutdown(void *pThis)
+static void Source2Server_Shutdown(void *pThis)
 {
     UnloadSwiftlyS2();
     g_pS2BinLib->Destroy();
 
-    g_Source2Server_Shutdown_Hook.call<void>(pThis);
+    s_Source2Server_Shutdown_Hook.call<void>(pThis);
 }
 
-bool Source2_Initialize(void *pThis)
+static bool Source2_Initialize(void *pThis)
 {
-    bool ret = g_Source2_Initialize_Hook.call<bool>(pThis);
+    bool ret = s_Source2_Initialize_Hook.call<bool>(pThis);
 
     LoadSwiftlyS2();
 
     return ret;
 }
 
-bool Source2ServerConfig_Connect(void *pThis, void *factory)
+static bool Source2ServerConfig_Connect(void *pThis, void *factory)
 {
-    bool ret = g_Source2ServerConfig_Connect_Hook.call<bool>(pThis, factory);
-    g_pCreateIFaceEngine = (CreateInterfaceFn)factory;
+    bool ret = s_Source2ServerConfig_Connect_Hook.call<bool>(pThis, factory);
+    g_pCreateIFaceEngine = reinterpret_cast<CreateInterfaceFn>(factory);
 
-    if ((bool)g_Source2_Initialize_Hook == false)
+    if (!s_Source2_Initialize_Hook)
     {
         void *s2init_func = nullptr;
         g_pS2BinLib->FindFuncWithString("engine2", "Engine loading startup asset: '%s'\n", &s2init_func);
 
-        g_Source2_Initialize_Hook = safetyhook::create_inline(s2init_func, (void *)Source2_Initialize);
+        InstallOnce(s_Source2_Initialize_Hook, s2init_func, Source2_Initialize);
     }
 
     return ret;
+}
+
+void HookServerConfig(void *iface)
+{
+    InstallOnce(s_Source2ServerConfig_Connect_Hook, static_cast<void ***>(iface)[0][0], Source2ServerConfig_Connect);
+}
+
+void HookServer(void *iface)
+{
+    InstallOnce(s_Source2Server_Shutdown_Hook, static_cast<void ***>(iface)[0][5], Source2Server_Shutdown);
 }

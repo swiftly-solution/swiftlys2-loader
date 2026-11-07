@@ -16,41 +16,29 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  ************************************************************************************************/
 
-#include "dynlib.h"
 #include "hooks.h"
-#include "tier0/conmsg.h"
-#include "tier0/platform.h"
-#include <s2binlib/s2binlib.h>
 
-#include <stdlib.h>
-#include <string>
+#include <format>
 
-void *libPtr = nullptr;
-extern std::string g_sSwiftlyS2Path;
-extern S2BinLib004 *g_pS2BinLib;
-extern std::string g_sGame;
+static void *libPtr = nullptr;
 
 void LoadSwiftlyS2()
 {
-    std::string computedPath = (std::string(Plat_GetGameDirectory()) + "/" + g_sGame + "/" + g_sSwiftlyS2Path + "/bin/" + WIN_LIN("win64/swiftlys2.dll", "linuxsteamrt64/swiftlys2.so"));
-
-    libPtr = load_library(computedPath.c_str());
+    libPtr = load_library(LibPath(g_sSwiftlyS2Path, WIN_LIN("swiftlys2.dll", "swiftlys2.so")));
     if (!libPtr)
     {
-        std::string libraryError = get_library_error();
-        std::string errorMessage = "SwiftlyS2: Failed to load SwiftlyS2: " + libraryError + "\n";
-        Msg(errorMessage.c_str());
+        Msg(std::format("SwiftlyS2: Failed to load SwiftlyS2: {}\n", get_library_error()).c_str());
         return;
     }
 
-    void *startCorePtr = get_export(libPtr, "StartCore");
-    if (!startCorePtr)
+    const auto startCore = get_export_as<bool (*)(void *, void *, void *, const char *)>(libPtr, "StartCore");
+    if (!startCore)
     {
         Msg("SwiftlyS2: Failed to load SwiftlyS2.\n");
         return;
     }
 
-    reinterpret_cast<bool (*)(void *, void *, void *, const char *)>(startCorePtr)((void *)g_pCreateIFaceServer, (void *)g_pCreateIFaceEngine, (void *)g_pS2BinLib, g_sGame.c_str());
+    startCore(reinterpret_cast<void *>(g_pCreateIFaceServer), reinterpret_cast<void *>(g_pCreateIFaceEngine), g_pS2BinLib, g_sGame.c_str());
 }
 
 void UnloadSwiftlyS2()
@@ -58,12 +46,12 @@ void UnloadSwiftlyS2()
     if (!libPtr)
         return;
 
-    void *stopCorePtr = get_export(libPtr, "StopCore");
-    if (!stopCorePtr)
+    const auto stopCore = get_export_as<bool (*)()>(libPtr, "StopCore");
+    if (!stopCore)
     {
         Msg("SwiftlyS2: Failed to unload SwiftlyS2.\n");
         return;
     }
 
-    reinterpret_cast<bool (*)()>(stopCorePtr)();
+    stopCore();
 }

@@ -1,10 +1,9 @@
 #include "dynlib.h"
 
 #ifdef _WIN32
-void *load_library(const char *path)
+void *load_library(const std::filesystem::path &path)
 {
-    HMODULE h = ::LoadLibraryA(path);
-    return (void *)h;
+    return ::LoadLibraryW(path.c_str());
 }
 
 std::string get_library_error()
@@ -33,21 +32,12 @@ std::string get_library_error()
 
 void *get_export(void *h, const char *name)
 {
-    void *f = ::GetProcAddress((HMODULE)h, name);
-    return f;
-}
-
-void unload_library(void *lib)
-{
-    if (!lib)
-        return;
-    ::FreeLibrary((HMODULE)lib);
+    return reinterpret_cast<void *>(::GetProcAddress(static_cast<HMODULE>(h), name));
 }
 #else
-void *load_library(const char *path)
+void *load_library(const std::filesystem::path &path)
 {
-    void *h = dlopen(path, RTLD_LAZY | RTLD_LOCAL);
-    return h;
+    return dlopen(path.c_str(), RTLD_LAZY | RTLD_LOCAL);
 }
 
 std::string get_library_error()
@@ -58,13 +48,6 @@ std::string get_library_error()
 
 void *get_export(void *h, const char *name)
 {
-    void *f = dlsym(h, name);
-    return f;
-}
-void unload_library(void *lib)
-{
-    if (!lib)
-        return;
-    dlclose(lib);
+    return dlsym(h, name);
 }
 #endif

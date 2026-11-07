@@ -33,7 +33,7 @@ extern "C"
 #define S2BINLIB_INTERFACE_NAME "S2BINLIB004"
 
     /// Forward declaration
-    struct S2BinLib004;
+    class S2BinLib004;
 
     /// Callback function type for pattern_scan_all functions
     /// @param index The index of the current match (0-based)

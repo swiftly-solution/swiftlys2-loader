@@ -19,18 +19,31 @@
 #ifndef src_hooks_h
 #define src_hooks_h
 
-#include <safetyhook/safetyhook.hpp>
+#include "dynlib.h"
+#include "tier0.h"
 
-typedef void *(*CreateInterfaceFn)(const char *name, int *retcode);
+#include <s2binlib/s2binlib.h>
 
-void Source2Server_Shutdown(void *pThis);
-bool Source2_Initialize(void *pThis);
-bool Source2ServerConfig_Connect(void *pThis, void *factory);
+#include <filesystem>
+#include <string>
 
-extern safetyhook::InlineHook g_Source2Server_Shutdown_Hook;
-extern safetyhook::InlineHook g_Source2_Initialize_Hook;
-extern safetyhook::InlineHook g_Source2ServerConfig_Connect_Hook;
-extern CreateInterfaceFn g_pCreateIFaceServer;
-extern CreateInterfaceFn g_pCreateIFaceEngine;
+using CreateInterfaceFn = void *(*)(const char *name, int *retcode);
+
+inline CreateInterfaceFn g_pCreateIFaceServer = nullptr;
+inline CreateInterfaceFn g_pCreateIFaceEngine = nullptr;
+inline S2BinLib004 *g_pS2BinLib = nullptr;
+inline std::string g_sSwiftlyS2Path;
+inline std::string g_sGame;
+
+inline std::filesystem::path LibPath(const std::filesystem::path &subdir, const char *lib)
+{
+    return std::filesystem::path(Plat_GetGameDirectory()) / g_sGame / subdir / "bin" / WIN_LIN("win64", "linuxsteamrt64") / lib;
+}
+
+void HookServerConfig(void *iface);
+void HookServer(void *iface);
+
+void LoadSwiftlyS2();
+void UnloadSwiftlyS2();
 
 #endif

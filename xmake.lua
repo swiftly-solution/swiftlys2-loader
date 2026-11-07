@@ -1,4 +1,6 @@
 
+add_rules("plugin.compile_commands.autoupdate", {outputdir = ".", lsp = "clangd"})
+
 target("server")
     set_kind("shared")
 

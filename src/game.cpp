@@ -16,53 +16,40 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  ************************************************************************************************/
 
+#include "game.h"
+
 #include <filesystem>
 
 #ifdef _WIN32
 #include <windows.h>
 #else
 #include <dlfcn.h>
-#include <climits>
-#include <cstdlib>
 #endif
 
-std::string GetDLLPath()
+static std::filesystem::path GetDLLPath()
 {
 #if defined(_WIN32)
-    char path[MAX_PATH];
-    HMODULE hModule = NULL;
-    GetModuleHandleExA(
+    HMODULE hModule = nullptr;
+    GetModuleHandleExW(
         GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-        (LPCSTR)&GetDLLPath,
+        reinterpret_cast<LPCWSTR>(&GetDLLPath),
         &hModule);
-    GetModuleFileNameA(hModule, path, MAX_PATH);
-    return std::string(path);
-#elif defined(__linux__) || defined(__APPLE__)
+
+    std::wstring path(MAX_PATH, L'\0');
+    path.resize(GetModuleFileNameW(hModule, path.data(), static_cast<DWORD>(path.size())));
+    return path;
+#else
     Dl_info info;
-    if (dladdr((void *)&GetDLLPath, &info) && info.dli_fname)
-    {
-        char resolved[PATH_MAX];
-        if (realpath(info.dli_fname, resolved))
-        {
-            return std::string(resolved);
-        }
-        return std::string(info.dli_fname);
-    }
-    return "";
+    if (!dladdr(reinterpret_cast<void *>(&GetDLLPath), &info) || !info.dli_fname)
+        return {};
+
+    std::error_code ec;
+    auto resolved = std::filesystem::canonical(info.dli_fname, ec);
+    return ec ? std::filesystem::path(info.dli_fname) : resolved;
 #endif
 }
 
 std::string GetGameFolder()
 {
-    std::filesystem::path dll_path = GetDLLPath();
-    std::filesystem::path currentPath = dll_path.parent_path();
-    while (!currentPath.empty() && currentPath.has_parent_path())
-    {
-        if (currentPath.filename() == "addons")
-        {
-            return currentPath.parent_path().filename().string();
-        }
-        currentPath = currentPath.parent_path();
-    }
-    return "";
+    return GameFolderFromPath(GetDLLPath());
 }
