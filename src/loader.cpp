@@ -18,8 +18,6 @@
 
 #include "hooks.h"
 
-#include <format>
-
 static void *libPtr = nullptr;
 
 void LoadSwiftlyS2()
@@ -27,7 +25,9 @@ void LoadSwiftlyS2()
     libPtr = load_library(LibPath(g_sSwiftlyS2Path, WIN_LIN("swiftlys2.dll", "swiftlys2.so")));
     if (!libPtr)
     {
-        Msg(std::format("SwiftlyS2: Failed to load SwiftlyS2: {}\n", get_library_error()).c_str());
+        std::string libraryError = get_library_error();
+        std::string errorMessage = "SwiftlyS2: Failed to load SwiftlyS2: " + libraryError + "\n";
+        Msg(errorMessage.c_str());
         return;
     }
 
